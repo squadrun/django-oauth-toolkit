@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
+        migrations.AlterField(
              model_name='Application',
              name='skip_authorization',
              field=models.BooleanField(default=False),
