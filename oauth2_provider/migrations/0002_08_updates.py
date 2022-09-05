@@ -16,12 +16,6 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-             model_name='Application',
-             name='skip_authorization',
-             field=models.BooleanField(default=False),
-             preserve_default=True,
-        ),
-        migrations.AlterField(
             model_name='Application',
             name='user',
             field=models.ForeignKey(related_name='oauth2_provider_application', to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE),
