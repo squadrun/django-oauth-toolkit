@@ -8,7 +8,7 @@ from django.db import models, transaction
 from django.utils import timezone
 
 from django.utils.translation import ugettext_lazy as _
-from django.utils.encoding import python_2_unicode_compatible
+from six import python_2_unicode_compatible
 from django.core.exceptions import ImproperlyConfigured
 
 from .scopes import get_scopes_backend
