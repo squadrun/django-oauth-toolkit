@@ -1,7 +1,7 @@
 import unittest
 from datetime import timedelta
 
-from django.conf.urls import url, include
+from django.urls import include, path
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.test import TestCase
@@ -52,12 +52,12 @@ try:
         required_scopes = ['resource1']
 
     urlpatterns = [
-        url(r'^oauth2/', include('oauth2_provider.urls')),
-        url(r'^oauth2-test/$', OAuth2View.as_view()),
-        url(r'^oauth2-scoped-test/$', ScopedView.as_view()),
-        url(r'^oauth2-read-write-test/$', ReadWriteScopedView.as_view()),
-        url(r'^oauth2-resource-scoped-test/$', ResourceScopedView.as_view()),
-        url(r'^oauth2-authenticated-or-scoped-test/$', AuthenticatedOrScopedView.as_view()),
+        path('oauth2/', include('oauth2_provider.urls')),
+        path('oauth2-test/', OAuth2View.as_view()),
+        path('oauth2-scoped-test/', ScopedView.as_view()),
+        path('oauth2-read-write-test/', ReadWriteScopedView.as_view()),
+        path('oauth2-resource-scoped-test/', ResourceScopedView.as_view()),
+        path('oauth2-authenticated-or-scoped-test/', AuthenticatedOrScopedView.as_view()),
     ]
 
     rest_framework_installed = True
@@ -105,13 +105,13 @@ class TestOAuth2Authentication(BaseTest):
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
     def test_authentication_allow(self):
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
     def test_authentication_denied(self):
         auth = self._create_authorization_header("fake-token")
-        response = self.client.get("/oauth2-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 401)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -119,7 +119,7 @@ class TestOAuth2Authentication(BaseTest):
         # user is not authenticated
         # not a correct token
         auth = self._create_authorization_header("fake-token")
-        response = self.client.get("/oauth2-authenticated-or-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-authenticated-or-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 401)
         # token doesn't have correct scope
         auth = self._create_authorization_header(self.access_token.token)
@@ -138,7 +138,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -147,7 +147,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
         # correct token and correct scope
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-authenticated-or-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-authenticated-or-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
         auth = self._create_authorization_header("fake-token")
@@ -174,7 +174,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 403)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -183,7 +183,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-read-write-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-read-write-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -192,7 +192,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.post("/oauth2-read-write-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.post("/oauth2-read-write-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -201,7 +201,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-read-write-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-read-write-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 403)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -210,7 +210,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.post("/oauth2-read-write-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.post("/oauth2-read-write-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 403)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -219,7 +219,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-resource-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-resource-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -228,7 +228,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.post("/oauth2-resource-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.post("/oauth2-resource-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 200)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -237,7 +237,7 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.get("/oauth2-resource-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.get("/oauth2-resource-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 403)
 
     @unittest.skipUnless(rest_framework_installed, 'djangorestframework not installed')
@@ -246,5 +246,5 @@ class TestOAuth2Authentication(BaseTest):
         self.access_token.save()
 
         auth = self._create_authorization_header(self.access_token.token)
-        response = self.client.post("/oauth2-resource-scoped-test/", HTTP_AUTHORIZATION=auth)
+        response = self.client.post("/oauth2-resource-scoped-test/", headers={"authorization": auth})
         self.assertEqual(response.status_code, 403)
